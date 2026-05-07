@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <title>Daily Points Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: #333; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .header .date { font-size: 0.95rem; opacity: 0.9; }
+        .score-card { background: white; border-radius: 20px; padding: 30px; text-align: center; margin-bottom: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .score-label { font-size: 0.9rem; color: #666; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .score-value { font-size: 4rem; font-weight: 800; color: #6366f1; line-height: 1; }
+        .score-sub { margin-top: 8px; font-size: 0.85rem; color: #888; }
+        .buttons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .btn-item { position: relative; }
+        .btn-action { width: 100%; padding: 20px 15px; border: none; border-radius: 16px; background: white; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .btn-action:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .btn-action:active { transform: translateY(0); }
+        .btn-action.active { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
+        .btn-action.active .btn-points { color: rgba(255,255,255,0.9); }
+        .btn-icon { font-size: 2rem; }
+        .btn-name { font-size: 0.95rem; font-weight: 600; }
+        .btn-points { font-size: 0.8rem; color: #888; font-weight: 500; }
+        .btn-status { position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.2); opacity: 0; transform: scale(0); transition: all 0.3s ease; }
+        .btn-action.active + .btn-status { opacity: 1; transform: scale(1); }
+        .controls { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); margin-bottom: 25px; }
+        .controls-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .controls-title { font-size: 1.1rem; font-weight: 700; color: #333; }
+        .btn-add { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-add:hover { transform: scale(1.05); }
+        .btn-list { display: flex; flex-direction: column; gap: 10px; }
+        .config-item { display: flex; align-items: center; gap: 10px; padding: 12px; background: #f8f9fa; border-radius: 12px; }
+        .config-item input { flex: 1; border: 1px solid #ddd; border-radius: 8px; padding: 8px 12px; font-size: 0.9rem; outline: none; }
+        .config-item input:focus { border-color: #6366f1; }
+        .config-points { width: 70px !important; text-align: center; }
+        .btn-icon-btn { background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 5px; border-radius: 6px; transition: background 0.2s; }
+        .btn-icon-btn:hover { background: rgba(0,0,0,0.05); }
+        .btn-delete { color: #ef4444; }
+        .btn-edit { color: #6366f1; }
+        .history-section { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .history-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; color: #333; }
+        .history-list { max-height: 300px; overflow-y: auto; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
+        .history-item:last-child { border-bottom: none; }
+        .history-date { font-weight: 600; color: #333; }
+        .history-score { font-weight: 700; color: #6366f1; font-size: 1.1rem; }
+        .history-details { font-size: 0.8rem; color: #888; margin-top: 2px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal { background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; transform: scale(0.9); transition: transform 0.3s; }
+        .modal-overlay.open .modal { transform: scale(1); }
+        .modal h2 { margin-bottom: 20px; color: #333; }
+        .modal-form { display: flex; flex-direction: column; gap: 15px; }
+        .modal-form label { font-size: 0.9rem; font-weight: 600; color: #555; }
+        .modal-form input { padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s; }
+        .modal-form input:focus { border-color: #6366f1; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-buttons button { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
+        .btn-secondary { background: #f3f4f6; color: #666; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #888; }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 10px; opacity: 0.5; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 500; z-index: 2000; transition: transform 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .offline-badge { position: fixed; top: 10px; right: 10px; background: #ef4444; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; opacity: 0; transition: opacity 0.3s; z-index: 100; }
+        .offline-badge.show { opacity: 1; }
+        @media (max-width: 480px) { .buttons-grid { grid-template-columns: 1fr 1fr; } .score-value { font-size: 3rem; } }
+    </style>
+</head>
+<body>
+    <div class="offline-badge" id="offlineBadge">Offline Mode</div>
+    <div class="container">
+        <div class="header">
+            <h1>Daily Points</h1>
+            <div class="date" id="currentDate"></div>
+        </div>
+        <div class="score-card">
+            <div class="score-label">Today's Score</div>
+            <div class="score-value" id="totalScore">0</div>
+            <div class="score-sub" id="scoreBreakdown">No points yet today</div>
+        </div>
+        <div class="buttons-grid" id="buttonsGrid"></div>
+        <div class="controls">
+            <div class="controls-header">
+                <div class="controls-title">Configure Buttons</div>
+                <button class="btn-add" onclick="openModal()">+ Add New</button>
+            </div>
+            <div class="btn-list" id="btnList"></div>
+        </div>
+        <div class="history-section">
+            <div class="history-title">Previous Days</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 id="modalTitle">Add New Button</h2>
+            <div class="modal-form">
+                <label>Button Name</label>
+                <input type="text" id="btnNameInput" placeholder="e.g., Read a book">
+                <label>Points (default: 10)</label>
+                <input type="number" id="btnPointsInput" value="10" min="1" max="100">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveButton()">Save</button>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        const STORAGE_KEY = 'dailyPointsTracker_v1';
+        let appData = {
+            buttons: [
+                { id: 'btn_1', name: 'Healthy Eating?', points: 10, icon: '🥗' },
+                { id: 'btn_2', name: 'Good Sleeping?', points: 10, icon: '😴' },
+                { id: 'btn_3', name: 'Fun Day?', points: 10, icon: '🎉' }
+            ],
+            history: {},
+            todayStatus: {}
+        };
+        let editingId = null;
+        function loadData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appData = { ...appData, ...parsed };
+                    if (!appData.buttons || appData.buttons.length === 0) {
+                        appData.buttons = [
+                            { id: 'btn_1', name: 'Healthy Eating?', points: 10, icon: '🥗' },
+                            { id: 'btn_2', name: 'Good Sleeping?', points: 10, icon: '😴' },
+                            { id: 'btn_3', name: 'Fun Day?', points: 10, icon: '🎉' }
+                        ];
+                    }
+                }
+            } catch (e) { console.error('Failed to load data:', e); }
+        }
+        function saveData() {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+            catch (e) { console.error('Failed to save data:', e); showToast('Failed to save data'); }
+        }
+        function getTodayString() { return new Date().toISOString().split('T')[0]; }
+        function getFormattedDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date().toLocaleDateString('en-US', options);
+        }
+        function initToday() {
+            const today = getTodayString();
+            if (!appData.todayStatus[today]) appData.todayStatus[today] = {};
+            const dates = Object.keys(appData.todayStatus).sort();
+            const yesterday = dates.find(d => d !== today);
+            if (yesterday && !appData.history[yesterday]) {
+                const yesterdayScore = calculateScoreForDate(yesterday);
+                if (yesterdayScore > 0) {
+                    appData.history[yesterday] = { score: yesterdayScore, buttons: { ...appData.todayStatus[yesterday] } };
+                }
+            }
+        }
+        function calculateScoreForDate(dateStr) {
+            const status = appData.todayStatus[dateStr] || {};
+            let score = 0;
+            appData.buttons.forEach(btn => { if (status[btn.id]) score += btn.points; });
+            return score;
+        }
+        function toggleButton(btnId) {
+            const today = getTodayString();
+            const currentState = appData.todayStatus[today][btnId];
+            if (currentState) {
+                delete appData.todayStatus[today][btnId];
+                showToast('Point removed');
+            } else {
+                appData.todayStatus[today][btnId] = true;
+                const btn = appData.buttons.find(b => b.id === btnId);
+                showToast(`+${btn.points} points!`);
+            }
+            saveData();
+            render();
+        }
+        function renderButtons() {
+            const grid = document.getElementById('buttonsGrid');
+            const today = getTodayString();
+            const status = appData.todayStatus[today] || {};
+            grid.innerHTML = appData.buttons.map(btn => {
+                const isActive = status[btn.id];
+                return `<div class="btn-item"><button class="btn-action ${isActive ? 'active' : ''}" onclick="toggleButton('${btn.id}')" title="Click to ${isActive ? 'remove' : 'add'} points"><span class="btn-icon">${btn.icon || '✨'}</span><span class="btn-name">${btn.name}</span><span class="btn-points">${btn.points} pts</span></button><div class="btn-status">✓</div></div>`;
+            }).join('');
+        }
+        function renderScore() {
+            const today = getTodayString();
+            const score = calculateScoreForDate(today);
+            document.getElementById('totalScore').textContent = score;
+            const activeButtons = appData.buttons.filter(btn => appData.todayStatus[today]?.[btn.id]);
+            if (activeButtons.length === 0) {
+                document.getElementById('scoreBreakdown').textContent = 'No points yet today';
+            } else {
+                const names = activeButtons.map(b => b.name.replace('?', '')).join(', ');
+                document.getElementById('scoreBreakdown').textContent = `${activeButtons.length} activities: ${names}`;
+            }
+        }
+        function renderConfig() {
+            const list = document.getElementById('btnList');
+            if (appData.buttons.length === 0) {
+                list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📋</div><div>No buttons configured</div></div>`;
+                return;
+            }
+            list.innerHTML = appData.buttons.map(btn => `
+                <div class="config-item">
+                    <input type="text" value="${btn.name}" onchange="updateButtonName('${btn.id}', this.value)" placeholder="Button name">
+                    <input type="number" value="${btn.points}" onchange="updateButtonPoints('${btn.id}', this.value)" class="config-points" min="1" max="100">
+                    <button class="btn-icon-btn btn-edit" onclick="editButton('${btn.id}')" title="Change icon">${btn.icon || '✨'}</button>
+                    <button class="btn-icon-btn btn-delete" onclick="deleteButton('${btn.id}')" title="Delete">🗑️</button>
+                </div>
+            `).join('');
+        }
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            const dates = Object.keys(appData.history).sort().reverse();
+            if (dates.length === 0) {
+                list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📊</div><div>No history yet</div><div style="font-size: 0.85rem; margin-top: 5px;">Complete activities to build your history</div></div>`;
+                return;
+            }
+            list.innerHTML = dates.map(date => {
+                const entry = appData.history[date];
+                const dateObj = new Date(date);
+                const formatted = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                const activeCount = Object.values(entry.buttons).filter(v => v).length;
+                const totalBtns = appData.buttons.length;
+                return `<div class="history-item"><div><div class="history-date">${formatted}</div><div class="history-details">${activeCount} of ${totalBtns} completed</div></div><div class="history-score">+${entry.score}</div></div>`;
+            }).join('');
+        }
+        function render() {
+            document.getElementById('currentDate').textContent = getFormattedDate();
+            renderButtons();
+            renderScore();
+            renderConfig();
+            renderHistory();
+        }
+        function openModal(editId = null) {
+            editingId = editId;
+            const overlay = document.getElementById('modalOverlay');
+            const title = document.getElementById('modalTitle');
+            const nameInput = document.getElementById('btnNameInput');
+            const pointsInput = document.getElementById('btnPointsInput');
+            if (editId) {
+                const btn = appData.buttons.find(b => b.id === editId);
+                title.textContent = 'Edit Button';
+                nameInput.value = btn.name;
+                pointsInput.value = btn.points;
+            } else {
+                title.textContent = 'Add New Button';
+                nameInput.value = '';
+                pointsInput.value = '10';
+            }
+            overlay.classList.add('open');
+            nameInput.focus();
+        }
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('open');
+            editingId = null;
+        }
+        function saveButton() {
+            const name = document.getElementById('btnNameInput').value.trim();
+            const points = parseInt(document.getElementById('btnPointsInput').value) || 10;
+            if (!name) { showToast('Please enter a name'); return; }
+            if (editingId) {
+                const btn = appData.buttons.find(b => b.id === editingId);
+                btn.name = name;
+                btn.points = points;
+                showToast('Button updated');
+            } else {
+                const newBtn = { id: 'btn_' + Date.now(), name: name, points: points, icon: '✨' };
+                appData.buttons.push(newBtn);
+                showToast('Button added');
+            }
+            saveData();
+            closeModal();
+            render();
+        }
+        function updateButtonName(id, newName) {
+            const btn = appData.buttons.find(b => b.id === id);
+            if (btn && newName.trim()) { btn.name = newName.trim(); saveData(); render(); }
+        }
+        function updateButtonPoints(id, newPoints) {
+            const btn = appData.buttons.find(b => b.id === id);
+            if (btn) { btn.points = parseInt(newPoints) || 10; saveData(); render(); }
+        }
+        function editButton(id) {
+            const btn = appData.buttons.find(b => b.id === id);
+            const icons = ['🥗', '😴', '🎉', '✨', '💪', '📚', '🎨', '🎵', '🏃', '🧘', '💧', '🍎', '⭐', '🔥', '💯'];
+            const currentIndex = icons.indexOf(btn.icon);
+            const nextIcon = icons[(currentIndex + 1) % icons.length];
+            btn.icon = nextIcon;
+            saveData();
+            render();
+            showToast(`Icon changed to ${nextIcon}`);
+        }
+        function deleteButton(id) {
+            if (appData.buttons.length <= 1) { showToast('You need at least one button'); return; }
+            if (confirm('Delete this button? This will also remove any points associated with it.')) {
+                appData.buttons = appData.buttons.filter(b => b.id !== id);
+                const today = getTodayString();
+                if (appData.todayStatus[today]) delete appData.todayStatus[today][id];
+                saveData();
+                render();
+                showToast('Button deleted');
+            }
+        }
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+        function updateOnlineStatus() {
+            const badge = document.getElementById('offlineBadge');
+            if (!navigator.onLine) badge.classList.add('show');
+            else badge.classList.remove('show');
+        }
+        if ('serviceWorker' in navigator) {
+            const swCode = `self.addEventListener('install', e => { e.waitUntil(self.skipWaiting()); }); self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); }); self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).catch(() => { return new Response('<html><body style=\"display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;\"><div style=\"text-align:center;\"><h1>Offline</h1><p>The app is cached and works offline.</p></div></body></html>', { headers: { 'Content-Type': 'text/html' } }); })); });`;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).then(reg => { console.log('Service Worker registered'); }).catch(err => { console.log('SW registration failed:', err); });
+        }
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+        loadData();
+        initToday();
+        updateOnlineStatus();
+        render();
+        setInterval(() => {
+            const currentDate = getTodayString();
+            if (!appData.todayStatus[currentDate]) {
+                initToday();
+                render();
+                showToast('New day! Score reset.');
+            }
+        }, 60000);
+    </script>
+</body>
+</html>
