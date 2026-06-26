@@ -4,7 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#6366f1">
-    <title>Daily Points Tracker</title>
+    <title>DailyTracker by HappyBein — Build better habits</title>
+    <meta name="description" content="Build better habits and stay consistent with a simple daily tracker that rewards your progress. Tick, streak, repeat. Free, no account needed." />
+    <link rel="canonical" href="https://dailytracker.yeahvibe.com" />
+    <meta name="author" content="HappyBein — happybein.com" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:url"         content="https://dailytracker.yeahvibe.com" />
+    <meta property="og:title"       content="DailyTracker by HappyBein — Build better habits" />
+    <meta property="og:description" content="Build better habits and stay consistent. Tick off your daily habits, track streaks, and stay motivated. Free, no account needed." />
+    <meta property="og:site_name"   content="DailyTracker by HappyBein" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content="DailyTracker by HappyBein" />
+    <meta name="twitter:description" content="Build better habits and stay consistent. Tick, streak, repeat. Free, no account needed." />
+
+    <!-- GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TJFL5YQ705"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-TJFL5YQ705', { anonymize_ip: true });
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: #333; padding: 20px; }
@@ -71,6 +99,10 @@
         .offline-badge.show { opacity: 1; }
         @media (max-width: 480px) { .buttons-grid { grid-template-columns: 1fr 1fr; } .score-value { font-size: 3rem; } }
     </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
 </head>
 <body>
     <div class="offline-badge" id="offlineBadge">Offline Mode</div>
@@ -318,32 +350,6 @@
             setTimeout(() => toast.classList.remove('show'), 2000);
         }
         function updateOnlineStatus() {
-            const badge = document.getElementById('offlineBadge');
-            if (!navigator.onLine) badge.classList.add('show');
-            else badge.classList.remove('show');
-        }
-        if ('serviceWorker' in navigator) {
-            const swCode = `self.addEventListener('install', e => { e.waitUntil(self.skipWaiting()); }); self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); }); self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).catch(() => { return new Response('<html><body style=\"display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;\"><div style=\"text-align:center;\"><h1>Offline</h1><p>The app is cached and works offline.</p></div></body></html>', { headers: { 'Content-Type': 'text/html' } }); })); });`;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl).then(reg => { console.log('Service Worker registered'); }).catch(err => { console.log('SW registration failed:', err); });
-        }
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-        document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal(); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
-        loadData();
-        initToday();
-        updateOnlineStatus();
-        render();
-        setInterval(() => {
-            const currentDate = getTodayString();
-            if (!appData.todayStatus[currentDate]) {
-                initToday();
-                render();
-                showToast('New day! Score reset.');
-            }
-        }, 60000);
-    </script>
-</body>
-</html>
+            const badge = doc
+<!-- HappyBein backlink -->
+<a href="https://happybein.com" target="_blank" rel="noopener" aria-label="HappyBein" style="position:fixed;bottom:14px;right:14px;width:30px;height:30px;border-radius:50%;background:#2ABFBF;color:#fff;display:flex;align-items:center;justify-content:center;font-family:Nunito,Arial,sans-serif;font-weight:900;font-size:14px;text-decoration:none;box-shadow:0 2px 8px rgba(42,191,191,0.4);z-index:9999;opacity:0.85;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.85'">H</a>
