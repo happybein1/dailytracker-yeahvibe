@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dailytracker-v1';
+const CACHE_NAME = 'dailytracker-v1-0';
 const STATIC_ASSETS = ['/', '/index.html', '/manifest.json', '/favicon.svg', '/icon-192.png'];
 
 self.addEventListener('install', (e) => {
